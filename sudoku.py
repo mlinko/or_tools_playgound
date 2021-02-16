@@ -5,12 +5,12 @@ import pandas as pd
 from ortools.linear_solver import pywraplp
 
 
-c = 3 # size of cell
-n = 9 # size of table
+c = 3  # size of cell
+n = 9  # size of table
 
 
 def load_table(string_repr):
-    return np.array([int(char) for char in string_repr]).reshape((9,9))
+    return np.array([int(char) for char in string_repr]).reshape((9, 9))
 
 
 def to_string(table):
@@ -18,7 +18,7 @@ def to_string(table):
 
 
 def vars_to_matrix(vars):
-    table = np.zeros((n,n), dtype=int)
+    table = np.zeros((n, n), dtype=int)
     for i in range(n):
         for j in range(n):
             for k in range(1, n + 1):
@@ -52,15 +52,18 @@ def solve(table):
 
     # cellwise
     for k in range(1, n + 1):
-        for offset_i in range(0, n, c):
-            for offset_j in range(0, n, c):
-                solver.Add(solver.Sum([vars[offset_i + i, offset_j + j, k] for i in range(c) for j in range(c)]) == 1)
+        for c_i in range(0, n, c):
+            for c_j in range(0, n, c):
+                solver.Add(solver.Sum(
+                    vars[c_i + i, c + j, k] for i in range(c) for j in range(c)
+                ) == 1)
 
     # must have value larger than zero
     for i in range(n):
         for j in range(n):
-            solver.Add(solver.Sum([vars[i, j, k] for k in range(1, n + 1)]) == 1)
-
+            solver.Add(solver.Sum(
+                vars[i, j, k] for k in range(1, n + 1)
+            ) == 1)
 
     status = solver.Solve()
     if status == pywraplp.Solver.OPTIMAL:
@@ -84,4 +87,6 @@ def main():
 
     print('Success rate: ', success/len(sudokus))
 
-main()
+
+if __name__ == '__main__':
+    main()
